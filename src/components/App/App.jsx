@@ -14,22 +14,20 @@ const initialState = [
 ];
 
 export default function App() {
-  const lStorage = window.localStorage.getItem('contacts');
+  const lStorage = localStorage.getItem('contacts');
 
-  const [contacts, setContacts] = useState(
-    lStorage ? JSON.parse(lStorage) : initialState
-  );
+  const [contacts, setContacts] = useState(() => {
+    return JSON.parse(lStorage) || initialState;
+  });
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    let lsValue = contacts;
-    if (lsValue) {
+    if (contacts.length === 0) {
+      localStorage.removeItem('contacts');
+    } else {
       localStorage.setItem('contacts', JSON.stringify(contacts));
     }
-    if (JSON.parse(window.localStorage.getItem('contacts')).length < 1) {
-      localStorage.removeItem('contacts');
-    }
-  }, [contacts]);
+  }, [contacts, lStorage]);
 
   const addNewContact = newContact => {
     if (
@@ -45,13 +43,10 @@ export default function App() {
   const contactsFilter = () => {
     const normalizeFilter = filter.toLowerCase();
     return contacts.filter(({ name, number }) => {
-      if (filter) {
-        return (
-          name.trim().toLowerCase().includes(normalizeFilter) ||
-          number.trim().toLowerCase().includes(normalizeFilter)
-        );
-      }
-      return contacts;
+      return (
+        name.trim().toLowerCase().includes(normalizeFilter) ||
+        number.trim().toLowerCase().includes(normalizeFilter)
+      );
     });
   };
 
